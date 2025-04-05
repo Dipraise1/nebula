@@ -15,7 +15,18 @@ declare global {
 }
 
 // Network configuration
-const SUPPORTED_NETWORKS = {
+type NetworkConfig = {
+  name: string;
+  currencySymbol: string;
+  blockExplorer: string;
+  rpcUrl: string;
+}
+
+type SupportedNetworks = {
+  [chainId: string]: NetworkConfig;
+}
+
+const SUPPORTED_NETWORKS: SupportedNetworks = {
   '0x1': {
     name: 'Ethereum',
     currencySymbol: 'ETH',
@@ -60,7 +71,7 @@ export default function Header() {
   const [networkId, setNetworkId] = useState('');
   const [supportedNetwork, setSupportedNetwork] = useState(true);
   const [showNetworkSwitcher, setShowNetworkSwitcher] = useState(false);
-  const [txPending, setTxPending] = useState(false);
+  const [txPending] = useState(false);
   const [connectionError, setConnectionError] = useState('');
   
   // Get details of current network
@@ -112,6 +123,7 @@ export default function Header() {
         window.ethereum.removeListener('disconnect', handleDisconnect);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   // Handle wallet connect event
@@ -194,9 +206,9 @@ export default function Header() {
       });
       
       setShowNetworkSwitcher(false);
-    } catch (switchError: any) {
+    } catch (switchError: unknown) {
       // This error code indicates that the chain has not been added to MetaMask.
-      if (switchError.code === 4902) {
+      if (typeof switchError === 'object' && switchError !== null && 'code' in switchError && (switchError as { code: number }).code === 4902) {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
@@ -221,66 +233,6 @@ export default function Header() {
       }
       console.error("Error switching network:", switchError);
     }
-  };
-  
-  // Simulate sending a transaction
-  const sendTransaction = async (toAddress: string, amount: string) => {
-    if (!window.ethereum || !isWalletConnected || !walletAddress) {
-      return {success: false, error: 'Wallet not connected'};
-    }
-    
-    try {
-      setTxPending(true);
-      
-      // Convert amount to wei (hex string)
-      const amountInWei = `0x${(parseFloat(amount) * 1e18).toString(16)}`;
-      
-      // Request transaction
-      const txHash = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [{
-          from: walletAddress,
-          to: toAddress,
-          value: amountInWei,
-          gas: '0x5208', // 21000 gas (standard transaction)
-        }],
-      });
-      
-      // Wait for transaction to be mined
-      const receipt = await waitForTransaction(txHash);
-      
-      setTxPending(false);
-      return {success: true, txHash, receipt};
-    } catch (error) {
-      console.error("Transaction error:", error);
-      setTxPending(false);
-      return {success: false, error};
-    }
-  };
-  
-  // Wait for transaction to be mined
-  const waitForTransaction = (txHash: string) => {
-    return new Promise((resolve, reject) => {
-      const checkTx = async () => {
-        try {
-          const receipt = await window.ethereum.request({
-            method: 'eth_getTransactionReceipt',
-            params: [txHash],
-          });
-          
-          if (receipt) {
-            resolve(receipt);
-          } else {
-            // Check again after 1 second
-            setTimeout(checkTx, 1000);
-          }
-        } catch (error) {
-          reject(error);
-        }
-      };
-      
-      checkTx();
-    });
   };
   
   // Prevent scrolling when mobile menu is open
@@ -325,9 +277,12 @@ export default function Header() {
       } else {
         setConnectionError("Please install MetaMask or another Ethereum wallet to connect.");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error connecting wallet:", error);
-      setConnectionError(error.message || "Failed to connect wallet. Please try again.");
+      const errorMessage = typeof error === 'object' && error !== null && 'message' in error 
+        ? String((error as { message: string }).message) 
+        : "Failed to connect wallet. Please try again.";
+      setConnectionError(errorMessage);
     } finally {
       setIsWalletConnecting(false);
     }

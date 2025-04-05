@@ -67,7 +67,8 @@ export default function LendGpu() {
         window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
       }
     };
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array with eslint disable comment
   
   // Check if wallet is on leaderboard
   const checkLeaderboard = (address: string) => {
@@ -242,7 +243,7 @@ export default function LendGpu() {
                   
                   {userRank && (
                     <div className="bg-card/50 p-4 rounded-lg mb-6 text-left">
-                      <p className="text-accent font-medium mb-2">🎉 Congratulations! You're now ranked #{userRank} on the leaderboard!</p>
+                      <p className="text-accent font-medium mb-2">🎉 Congratulations! You&apos;re now ranked #{userRank} on the leaderboard!</p>
                       <p className="text-sm text-gray-400">Keep adding more GPUs to increase your earnings and climb the ranks.</p>
                     </div>
                   )}

@@ -34,6 +34,12 @@ const durationOptions = [
 
 type RentalStatus = 'idle' | 'processing' | 'success' | 'error';
 
+// Define error type for MetaMask errors
+interface MetaMaskError {
+  message: string;
+  code?: number;
+}
+
 export default function GpuRental() {
   const [selectedGpu, setSelectedGpu] = useState<GPUOption>(gpuOptions[0]);
   const [duration, setDuration] = useState(1);
@@ -109,9 +115,12 @@ export default function GpuRental() {
           setWalletAddress(accounts[0]);
           setIsWalletConnected(true);
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error connecting wallet:", error);
-        setErrorMessage(error.message || "Failed to connect wallet");
+        const errorMessage = typeof error === 'object' && error !== null && 'message' in error 
+          ? String((error as MetaMaskError).message) 
+          : "Failed to connect wallet";
+        setErrorMessage(errorMessage);
       }
     } else {
       setErrorMessage("Please install MetaMask or another Ethereum wallet");
@@ -153,9 +162,12 @@ export default function GpuRental() {
         setRentalStatus('idle');
         setTxHash(null);
       }, 10000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Transaction error:", error);
-      setErrorMessage(error.message || "Transaction failed");
+      const errorMessage = typeof error === 'object' && error !== null && 'message' in error 
+        ? String((error as MetaMaskError).message) 
+        : "Transaction failed";
+      setErrorMessage(errorMessage);
       setRentalStatus('error');
     }
   };
