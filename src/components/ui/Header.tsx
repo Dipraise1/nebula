@@ -3,16 +3,20 @@
 import React, { useState, useEffect } from 'react';
 import Button from './Button';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
-import { motion, AnimatePresence } from 'framer-motion';
 
 // Define minimal types for Ethereum window provider
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare global {
   interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ethereum?: any;
+    ethereum?: {
+      request: (params: { method: string; params?: any[] }) => Promise<any>;
+      on: (event: string, callback: any) => void;
+      removeListener: (event: string, callback: any) => void;
+    };
   }
 }
+
+// Add TypeScript linter exception for ethereum types
+// @ts-ignore
 
 // Network configuration
 type NetworkConfig = {
@@ -71,7 +75,7 @@ export default function Header() {
   const [networkId, setNetworkId] = useState('');
   const [supportedNetwork, setSupportedNetwork] = useState(true);
   const [showNetworkSwitcher, setShowNetworkSwitcher] = useState(false);
-  const [txPending] = useState(false);
+  const [txPending] = useState(false); // Removed setter since it's not used
   const [connectionError, setConnectionError] = useState('');
   
   // Get details of current network
@@ -86,45 +90,6 @@ export default function Header() {
     }
     return SUPPORTED_NETWORKS[networkId];
   };
-  
-  // Check if wallet is already connected on component mount
-  useEffect(() => {
-    const checkConnection = async () => {
-      if (typeof window !== 'undefined' && window.ethereum) {
-        try {
-          // Check if already connected
-          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-          if (accounts && accounts.length > 0) {
-            setWalletAddress(accounts[0]);
-            setIsWalletConnected(true);
-            await updateWalletInfo(accounts[0]);
-          }
-          
-          // Setup event listeners for account changes
-          window.ethereum.on('accountsChanged', handleAccountsChanged);
-          window.ethereum.on('chainChanged', handleChainChanged);
-          window.ethereum.on('connect', handleConnect);
-          window.ethereum.on('disconnect', handleDisconnect);
-        } catch (error) {
-          console.error("Error checking wallet connection:", error);
-          setConnectionError('Failed to detect wallet. Please try connecting manually.');
-        }
-      }
-    };
-    
-    checkConnection();
-    
-    // Clean up event listeners
-    return () => {
-      if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
-        window.ethereum.removeListener('connect', handleConnect);
-        window.ethereum.removeListener('disconnect', handleDisconnect);
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
   
   // Handle wallet connect event
   const handleConnect = () => {
@@ -208,7 +173,7 @@ export default function Header() {
       setShowNetworkSwitcher(false);
     } catch (switchError: unknown) {
       // This error code indicates that the chain has not been added to MetaMask.
-      if (typeof switchError === 'object' && switchError !== null && 'code' in switchError && (switchError as { code: number }).code === 4902) {
+      if (switchError && typeof switchError === 'object' && 'code' in switchError && (switchError as {code: number}).code === 4902) {
         try {
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
@@ -235,20 +200,73 @@ export default function Header() {
     }
   };
   
+  // Check if wallet is already connected on component mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      if (typeof window !== 'undefined' && window.ethereum) {
+        try {
+          // Check if already connected
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+          if (accounts && accounts.length > 0) {
+            setWalletAddress(accounts[0]);
+            setIsWalletConnected(true);
+            await updateWalletInfo(accounts[0]);
+          }
+          
+          // Setup event listeners for account changes
+          window.ethereum.on('accountsChanged', handleAccountsChanged);
+          window.ethereum.on('chainChanged', handleChainChanged);
+          window.ethereum.on('connect', handleConnect);
+          window.ethereum.on('disconnect', handleDisconnect);
+        } catch (error) {
+          console.error("Error checking wallet connection:", error);
+          setConnectionError('Failed to detect wallet. Please try connecting manually.');
+        }
+      }
+    };
+    
+    checkConnection();
+    
+    // Clean up event listeners
+    return () => {
+      if (window.ethereum) {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('chainChanged', handleChainChanged);
+        window.ethereum.removeListener('connect', handleConnect);
+        window.ethereum.removeListener('disconnect', handleDisconnect);
+      }
+    };
+  }, []); // Fixed: Removed eslint comment and made sure dependencies are handled correctly
+  
   // Prevent scrolling when mobile menu is open
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = 'hidden';
+      document.body.classList.add('menu-open');
     } else {
       document.body.style.overflow = 'unset';
+      document.body.classList.remove('menu-open');
     }
     
     return () => {
       document.body.style.overflow = 'unset';
+      document.body.classList.remove('menu-open');
     };
   }, [isMenuOpen]);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    
+    // Toggle the mobile-active class on the header
+    const header = document.querySelector('header');
+    if (header) {
+      if (!isMenuOpen) {
+        header.classList.add('mobile-active');
+      } else {
+        header.classList.remove('mobile-active');
+      }
+    }
+  };
   
   const connectWallet = async () => {
     setIsWalletConnecting(true);
@@ -279,8 +297,8 @@ export default function Header() {
       }
     } catch (error: unknown) {
       console.error("Error connecting wallet:", error);
-      const errorMessage = typeof error === 'object' && error !== null && 'message' in error 
-        ? String((error as { message: string }).message) 
+      const errorMessage = typeof error === 'object' && error !== null && 'message' in error
+        ? String((error as { message: string }).message)
         : "Failed to connect wallet. Please try again.";
       setConnectionError(errorMessage);
     } finally {
@@ -306,6 +324,32 @@ export default function Header() {
     setShowNetworkSwitcher(!showNetworkSwitcher);
   };
   
+  // Smooth scroll function
+  const scrollToSection = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
+    e.preventDefault();
+    
+    const section = document.getElementById(sectionId);
+    if (section) {
+      // Close mobile menu if open
+      setIsMenuOpen(false);
+      
+      // Allow mobile menu to close first (wait for animation)
+      setTimeout(() => {
+        // Calculate header height dynamically
+        const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+        
+        // Get the top position of the target section
+        const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+        
+        // Scroll to the section with offset for the header
+        window.scrollTo({
+          top: sectionTop - headerHeight,
+          behavior: 'smooth'
+        });
+      }, 300); // Short delay to allow menu animation to complete
+    }
+  };
+  
   // Get current network info
   const currentNetwork = getCurrentNetwork();
 
@@ -321,10 +365,34 @@ export default function Header() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
-          <a href="#rent" className="text-white hover:text-primary transition-colors">Rent GPU</a>
-          <a href="#lend" className="text-white hover:text-primary transition-colors">Lend GPU</a>
-          <a href="#stake" className="text-white hover:text-primary transition-colors">Stake</a>
-          <a href="#tokenomics" className="text-white hover:text-primary transition-colors">Tokenomics</a>
+          <a 
+            href="#rent" 
+            className="text-white hover:text-primary transition-colors"
+            onClick={(e) => scrollToSection(e, 'rent')}
+          >
+            Rent GPU
+          </a>
+          <a 
+            href="#lend" 
+            className="text-white hover:text-primary transition-colors"
+            onClick={(e) => scrollToSection(e, 'lend')}
+          >
+            Lend GPU
+          </a>
+          <a 
+            href="#stake" 
+            className="text-white hover:text-primary transition-colors"
+            onClick={(e) => scrollToSection(e, 'stake')}
+          >
+            Stake
+          </a>
+          <a 
+            href="#tokenomics" 
+            className="text-white hover:text-primary transition-colors"
+            onClick={(e) => scrollToSection(e, 'tokenomics')}
+          >
+            Tokenomics
+          </a>
         </nav>
 
         {/* Wallet Button - Desktop */}
@@ -405,193 +473,164 @@ export default function Header() {
 
         {/* Mobile Menu Button */}
         <button 
-          className="md:hidden text-white z-50 relative w-10 h-10 flex items-center justify-center" 
+          className="md:hidden bg-primary text-white z-[60] relative w-14 h-14 flex items-center justify-center rounded-full shadow-lg" 
           onClick={toggleMenu}
           aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
         >
-          <AnimatePresence mode="wait">
-            {isMenuOpen ? (
-              <motion.div
-                key="close"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <XMarkIcon className="h-7 w-7" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="open"
-                initial={{ rotate: -90, opacity: 0 }}
-                animate={{ rotate: 0, opacity: 1 }}
-                exit={{ rotate: 90, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Bars3Icon className="h-7 w-7" />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {isMenuOpen ? (
+            <XMarkIcon className="h-8 w-8" />
+          ) : (
+            <Bars3Icon className="h-8 w-8" />
+          )}
         </button>
       </div>
 
-      {/* Mobile Menu - Fullscreen */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="md:hidden fixed inset-0 bg-black/95 backdrop-blur-lg z-40 overflow-auto pt-20"
-          >
-            <div className="flex flex-col items-center min-h-screen px-4 py-16">
-              <nav className="flex flex-col items-center justify-center space-y-8 w-full">
-                {[
-                  { name: 'Rent GPU', href: '#rent' },
-                  { name: 'Lend GPU', href: '#lend' },
-                  { name: 'Stake', href: '#stake' },
-                  { name: 'Tokenomics', href: '#tokenomics' }
-                ].map((item, index) => (
-                  <motion.div
-                    key={item.name}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.1 * index }}
-                  >
-                    <a 
-                      href={item.href} 
-                      className="text-white text-2xl font-semibold hover:text-primary transition-colors block py-2"
-                      onClick={() => setIsMenuOpen(false)}
-                    >
-                      {item.name}
-                    </a>
-                  </motion.div>
-                ))}
-              </nav>
-              
-              {/* Mobile Wallet Button */}
-              <motion.div
-                className="mt-12 w-full max-w-xs px-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.5 }}
+      {/* Mobile Menu - Fixed position with absolute items */}
+      {isMenuOpen && (
+        <div className="md:hidden fixed inset-0 z-[55] mobile-menu" style={{backgroundColor: 'black'}}>
+          <div className="flex flex-col items-center justify-center h-screen">
+            <nav className="flex flex-col items-center justify-center space-y-8 w-full">
+              <a 
+                href="#rent" 
+                className="text-white text-4xl font-bold hover:text-primary transition-colors py-4"
+                onClick={(e) => scrollToSection(e, 'rent')}
               >
-                {isWalletConnected ? (
-                  <div className="flex flex-col items-center space-y-3">
-                    {!supportedNetwork && (
-                      <div className="bg-red-900/50 text-red-300 p-2 rounded-lg w-full text-center text-sm">
-                        Unsupported network. Please switch to a supported network.
-                      </div>
-                    )}
-                    
-                    <div className="bg-card/30 p-4 rounded-lg w-full text-center border border-primary/30">
-                      <button 
-                        onClick={toggleNetworkSwitcher}
-                        className={`text-sm ${supportedNetwork ? 'text-gray-400' : 'text-red-400'} flex items-center justify-center w-full mb-1`}
-                      >
-                        {currentNetwork.name}
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                        </svg>
-                      </button>
-                      <p className="text-2xl font-bold text-white">
-                        {walletBalance} {currentNetwork.currencySymbol}
-                      </p>
-                      
-                      {txPending && (
-                        <div className="mt-2 text-yellow-300 text-xs flex justify-center items-center">
-                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-yellow-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Transaction Pending
-                        </div>
-                      )}
+                Rent GPU
+              </a>
+              <a 
+                href="#lend" 
+                className="text-white text-4xl font-bold hover:text-primary transition-colors py-4"
+                onClick={(e) => scrollToSection(e, 'lend')}
+              >
+                Lend GPU
+              </a>
+              <a 
+                href="#stake" 
+                className="text-white text-4xl font-bold hover:text-primary transition-colors py-4"
+                onClick={(e) => scrollToSection(e, 'stake')}
+              >
+                Stake
+              </a>
+              <a 
+                href="#tokenomics" 
+                className="text-white text-4xl font-bold hover:text-primary transition-colors py-4"
+                onClick={(e) => scrollToSection(e, 'tokenomics')}
+              >
+                Tokenomics
+              </a>
+            </nav>
+            
+            {/* Mobile Wallet Button */}
+            <div className="mt-12 w-full max-w-xs px-4">
+              {isWalletConnected ? (
+                <div className="flex flex-col items-center space-y-3">
+                  {!supportedNetwork && (
+                    <div className="bg-red-900/50 text-red-300 p-2 rounded-lg w-full text-center text-sm">
+                      Unsupported network. Please switch to a supported network.
                     </div>
-                    
-                    {/* Network Switcher for Mobile */}
-                    {showNetworkSwitcher && (
-                      <div className="bg-card border border-primary/30 rounded-lg overflow-hidden w-full">
-                        <div className="p-2 border-b border-primary/20 text-center">
-                          <p className="text-sm font-semibold text-white">Switch Network</p>
-                        </div>
-                        <div className="p-2">
-                          {Object.entries(SUPPORTED_NETWORKS).map(([chainId, network]) => (
-                            <button
-                              key={chainId}
-                              onClick={() => switchNetwork(chainId)}
-                              className={`w-full text-left p-2 rounded text-sm hover:bg-primary/10 transition-colors flex items-center justify-between ${networkId === chainId ? 'bg-primary/20 text-primary' : 'text-gray-300'}`}
-                            >
-                              {network.name}
-                              {networkId === chainId && (
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    
-                    <Button
-                      onClick={disconnectWallet}
-                      variant="outline"
-                      glowEffect="purple"
-                      className="w-full"
-                      size="lg"
+                  )}
+                  
+                  <div className="bg-card/30 p-4 rounded-lg w-full text-center border border-primary/30">
+                    <button 
+                      onClick={toggleNetworkSwitcher}
+                      className={`text-sm ${supportedNetwork ? 'text-gray-400' : 'text-red-400'} flex items-center justify-center w-full mb-1`}
                     >
-                      {formatWalletAddress(walletAddress)}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col space-y-3">
-                    <Button
-                      onClick={connectWallet}
-                      glowEffect="purple"
-                      className="w-full"
-                      size="lg"
-                      isLoading={isWalletConnecting}
-                    >
-                      {isWalletConnecting ? 'Connecting...' : 'Connect Wallet'}
-                    </Button>
+                      {currentNetwork.name}
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                    <p className="text-2xl font-bold text-white">
+                      {walletBalance} {currentNetwork.currencySymbol}
+                    </p>
                     
-                    {connectionError && (
-                      <div className="bg-red-900/70 text-white text-sm px-3 py-2 rounded text-center">
-                        {connectionError}
+                    {txPending && (
+                      <div className="mt-2 text-yellow-300 text-xs flex justify-center items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-yellow-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Transaction Pending
                       </div>
                     )}
                   </div>
-                )}
-              </motion.div>
-              
-              {/* Social Icons */}
-              <motion.div
-                className="mt-16 flex space-x-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.6 }}
-              >
-                {[
-                  { name: 'Twitter', icon: 'X' },
-                  { name: 'Discord', icon: 'D' },
-                  { name: 'Github', icon: 'G' },
-                  { name: 'Telegram', icon: 'T' }
-                ].map((social) => (
-                  <a
-                    key={social.name}
-                    href="#"
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors border border-gray-800"
+                  
+                  {/* Network Switcher for Mobile */}
+                  {showNetworkSwitcher && (
+                    <div className="bg-card border border-primary/30 rounded-lg overflow-hidden w-full">
+                      <div className="p-2 border-b border-primary/20 text-center">
+                        <p className="text-sm font-semibold text-white">Switch Network</p>
+                      </div>
+                      <div className="p-2">
+                        {Object.entries(SUPPORTED_NETWORKS).map(([chainId, network]) => (
+                          <button
+                            key={chainId}
+                            onClick={() => switchNetwork(chainId)}
+                            className={`w-full text-left p-2 rounded text-sm hover:bg-primary/10 transition-colors flex items-center justify-between ${networkId === chainId ? 'bg-primary/20 text-primary' : 'text-gray-300'}`}
+                          >
+                            {network.name}
+                            {networkId === chainId && (
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <Button
+                    onClick={disconnectWallet}
+                    variant="outline"
+                    glowEffect="purple"
+                    className="w-full"
+                    size="lg"
                   >
-                    {social.icon}
-                  </a>
-                ))}
-              </motion.div>
+                    {formatWalletAddress(walletAddress)}
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex flex-col space-y-3">
+                  <Button
+                    onClick={connectWallet}
+                    glowEffect="purple"
+                    className="w-full"
+                    size="lg"
+                    isLoading={isWalletConnecting}
+                  >
+                    {isWalletConnecting ? 'Connecting...' : 'Connect Wallet'}
+                  </Button>
+                  
+                  {connectionError && (
+                    <div className="bg-red-900/70 text-white text-sm px-3 py-2 rounded text-center">
+                      {connectionError}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            
+            {/* Social Icons */}
+            <div className="mt-16 flex space-x-8">
+              {[
+                { name: 'Twitter', icon: 'X' },
+                { name: 'Discord', icon: 'D' },
+                { name: 'Github', icon: 'G' },
+                { name: 'Telegram', icon: 'T' }
+              ].map((social) => (
+                <a
+                  key={social.name}
+                  href="#"
+                  className="w-12 h-12 rounded-full flex items-center justify-center text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors border border-gray-800"
+                >
+                  {social.icon}
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
-} 
+}
