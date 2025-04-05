@@ -26,15 +26,15 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4 sm:mb-6">
               <span className="text-primary text-glow">Nebula AI</span> <br />
               <span>Decentralized</span> <br />
               <span className="text-secondary text-glow">GPU Marketplace</span>
             </h1>
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-lg sm:text-xl text-gray-300 mb-6 sm:mb-8">
               Rent GPU resources, earn rewards by lending, and participate in the fairlaunch ecosystem powered by $NAI.
             </p>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-3 sm:gap-4">
               <Button size="lg" glowEffect="purple">Explore Platform</Button>
               <Button size="lg" variant="outline" glowEffect="cyan">Learn More</Button>
             </div>
@@ -45,10 +45,10 @@ export default function Hero() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="flex justify-center"
+            className="flex justify-center mt-8 sm:mt-0"
           >
-            <div className="glass-effect rounded-xl p-8 relative">
-              <div className="w-full h-64 rounded-lg neon-purple flex items-center justify-center">
+            <div className="glass-effect rounded-xl p-4 sm:p-8 relative w-full max-w-sm">
+              <div className="w-full h-48 sm:h-64 rounded-lg neon-purple flex items-center justify-center">
                 <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="40" y="40" width="120" height="120" rx="8" stroke="#7C3AED" strokeWidth="4" />
                   <rect x="55" y="55" width="90" height="90" rx="4" stroke="#7C3AED" strokeWidth="2" />

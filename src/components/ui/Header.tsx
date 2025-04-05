@@ -488,10 +488,10 @@ export default function Header() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="md:hidden fixed inset-0 bg-black/95 backdrop-blur-lg z-40 overflow-auto"
+            className="md:hidden fixed inset-0 bg-black/95 backdrop-blur-lg z-40 overflow-auto pt-20"
           >
-            <div className="flex flex-col items-center min-h-screen py-24">
-              <nav className="flex flex-col items-center justify-center space-y-10 w-full pt-10">
+            <div className="flex flex-col items-center min-h-screen px-4 py-16">
+              <nav className="flex flex-col items-center justify-center space-y-8 w-full">
                 {[
                   { name: 'Rent GPU', href: '#rent' },
                   { name: 'Lend GPU', href: '#lend' },
@@ -506,7 +506,7 @@ export default function Header() {
                   >
                     <a 
                       href={item.href} 
-                      className="text-white text-3xl font-semibold hover:text-primary transition-colors"
+                      className="text-white text-2xl font-semibold hover:text-primary transition-colors block py-2"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       {item.name}
@@ -517,7 +517,7 @@ export default function Header() {
               
               {/* Mobile Wallet Button */}
               <motion.div
-                className="mt-16 w-full max-w-xs px-6"
+                className="mt-12 w-full max-w-xs px-4"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: 0.5 }}

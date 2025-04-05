@@ -144,26 +144,29 @@ export default function Features() {
           
           <div className="relative max-w-4xl mx-auto py-10">
             {/* Vertical line connecting steps */}
-            <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-gradient-to-b from-primary via-secondary to-accent -translate-x-1/2"></div>
+            <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-gradient-to-b from-primary via-secondary to-accent -translate-x-1/2 hidden sm:block"></div>
             
             {/* Steps */}
-            <div className="space-y-20">
+            <div className="space-y-20 sm:space-y-20">
               {/* Step 1 */}
               <motion.div 
-                className="relative flex items-center"
+                className="relative flex flex-col sm:flex-row items-center"
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="w-1/2 pr-12 text-right">
+                <div className="w-full sm:w-1/2 sm:pr-12 text-center sm:text-right mb-4 sm:mb-0">
                   <h3 className="text-2xl font-bold mb-3">Connect</h3>
                   <p className="text-gray-400">Link your wallet to access the decentralized GPU marketplace and browse available resources</p>
                 </div>
-                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-primary flex items-center justify-center z-10 neon-purple">
+                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-primary flex items-center justify-center z-10 neon-purple hidden sm:flex">
                   <span className="text-white font-bold">1</span>
                 </div>
-                <div className="w-1/2 pl-12">
+                <div className="sm:hidden w-12 h-12 rounded-full bg-primary flex items-center justify-center z-10 neon-purple mb-4">
+                  <span className="text-white font-bold">1</span>
+                </div>
+                <div className="w-full sm:w-1/2 sm:pl-12">
                   <Card className="mb-4">
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center text-primary">
@@ -182,13 +185,13 @@ export default function Features() {
               
               {/* Step 2 */}
               <motion.div 
-                className="relative flex items-center"
+                className="relative flex flex-col sm:flex-row items-center"
                 initial={{ opacity: 0, x: 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="w-1/2 pr-12">
+                <div className="order-2 sm:order-1 w-full sm:w-1/2 sm:pr-12">
                   <Card className="mb-4">
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-secondary/20 rounded-full flex items-center justify-center text-secondary">
@@ -203,10 +206,13 @@ export default function Features() {
                     </div>
                   </Card>
                 </div>
-                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-secondary flex items-center justify-center z-10 neon-cyan">
+                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-secondary flex items-center justify-center z-10 neon-cyan hidden sm:flex">
                   <span className="text-white font-bold">2</span>
                 </div>
-                <div className="w-1/2 pl-12 text-left">
+                <div className="sm:hidden w-12 h-12 rounded-full bg-secondary flex items-center justify-center z-10 neon-cyan mb-4">
+                  <span className="text-white font-bold">2</span>
+                </div>
+                <div className="order-1 sm:order-2 w-full sm:w-1/2 sm:pl-12 text-center sm:text-left mb-4 sm:mb-0">
                   <h3 className="text-2xl font-bold mb-3">Configure</h3>
                   <p className="text-gray-400">Specify your computational requirements and configure your environment with prebuilt templates</p>
                 </div>
@@ -214,20 +220,23 @@ export default function Features() {
               
               {/* Step 3 */}
               <motion.div 
-                className="relative flex items-center"
+                className="relative flex flex-col sm:flex-row items-center"
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="w-1/2 pr-12 text-right">
+                <div className="w-full sm:w-1/2 sm:pr-12 text-center sm:text-right mb-4 sm:mb-0">
                   <h3 className="text-2xl font-bold mb-3">Pay</h3>
                   <p className="text-gray-400">Fund your compute session with $NAI tokens, with transparent pricing and no hidden fees</p>
                 </div>
-                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-accent flex items-center justify-center z-10 neon-pink">
+                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-accent flex items-center justify-center z-10 neon-pink hidden sm:flex">
                   <span className="text-white font-bold">3</span>
                 </div>
-                <div className="w-1/2 pl-12">
+                <div className="sm:hidden w-12 h-12 rounded-full bg-accent flex items-center justify-center z-10 neon-pink mb-4">
+                  <span className="text-white font-bold">3</span>
+                </div>
+                <div className="w-full sm:w-1/2 sm:pl-12">
                   <Card className="mb-4">
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center text-accent">
@@ -247,13 +256,13 @@ export default function Features() {
               
               {/* Step 4 */}
               <motion.div 
-                className="relative flex items-center"
+                className="relative flex flex-col sm:flex-row items-center"
                 initial={{ opacity: 0, x: 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5 }}
               >
-                <div className="w-1/2 pr-12">
+                <div className="order-2 sm:order-1 w-full sm:w-1/2 sm:pr-12">
                   <Card className="mb-4">
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center text-green-500">
@@ -268,10 +277,13 @@ export default function Features() {
                     </div>
                   </Card>
                 </div>
-                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-green-500 flex items-center justify-center z-10 shadow-glow-green">
+                <div className="absolute left-1/2 -translate-x-1/2 w-12 h-12 rounded-full bg-green-500 flex items-center justify-center z-10 shadow-glow-green hidden sm:flex">
                   <span className="text-white font-bold">4</span>
                 </div>
-                <div className="w-1/2 pl-12 text-left">
+                <div className="sm:hidden w-12 h-12 rounded-full bg-green-500 flex items-center justify-center z-10 shadow-glow-green mb-4">
+                  <span className="text-white font-bold">4</span>
+                </div>
+                <div className="order-1 sm:order-2 w-full sm:w-1/2 sm:pl-12 text-center sm:text-left mb-4 sm:mb-0">
                   <h3 className="text-2xl font-bold mb-3">Compute</h3>
                   <p className="text-gray-400">Launch your workload with instant access to distributed GPU resources across the network</p>
                 </div>

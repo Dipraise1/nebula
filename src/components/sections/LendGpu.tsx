@@ -294,7 +294,7 @@ export default function LendGpu() {
                       id="gpu-model"
                       value={selectedGpu.id}
                       onChange={handleGpuChange}
-                      className="w-full py-2.5 px-4 bg-card border border-border rounded-lg focus:outline-none focus:border-accent"
+                      className="w-full py-3 sm:py-2.5 px-4 bg-card border border-border rounded-lg focus:outline-none focus:border-accent text-base"
                       disabled={!isWalletConnected}
                     >
                       {gpuModels.map(gpu => (
@@ -315,7 +315,7 @@ export default function LendGpu() {
                       min="1"
                       value={quantity}
                       onChange={handleQuantityChange}
-                      className="w-full py-2.5 px-4 bg-card border border-border rounded-lg focus:outline-none focus:border-accent"
+                      className="w-full py-3 sm:py-2.5 px-4 bg-card border border-border rounded-lg focus:outline-none focus:border-accent text-base"
                       disabled={!isWalletConnected}
                     />
                   </div>
@@ -328,7 +328,7 @@ export default function LendGpu() {
                       id="location"
                       value={location}
                       onChange={handleLocationChange}
-                      className="w-full py-2.5 px-4 bg-card border border-border rounded-lg focus:outline-none focus:border-accent"
+                      className="w-full py-3 sm:py-2.5 px-4 bg-card border border-border rounded-lg focus:outline-none focus:border-accent text-base"
                       disabled={!isWalletConnected}
                     >
                       {locationOptions.map(loc => (
@@ -350,7 +350,7 @@ export default function LendGpu() {
                       max="24"
                       value={availability}
                       onChange={handleAvailabilityChange}
-                      className="w-full py-2.5 px-4 bg-card border border-border rounded-lg focus:outline-none focus:border-accent"
+                      className="w-full py-3 sm:py-2.5 px-4 bg-card border border-border rounded-lg focus:outline-none focus:border-accent text-base"
                       disabled={!isWalletConnected}
                     />
                   </div>
@@ -431,43 +431,43 @@ export default function LendGpu() {
             <Card className="h-full" glassEffect>
               <h3 className="text-2xl font-bold mb-6">Top GPU Providers Leaderboard</h3>
               
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto -mx-4 sm:mx-0">
                 <table className="min-w-full">
                   <thead>
                     <tr>
-                      <th className="py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Rank</th>
+                      <th className="py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider pl-4 sm:pl-3">Rank</th>
                       <th className="py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Provider</th>
                       <th className="py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">GPUs</th>
-                      <th className="py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Earnings</th>
-                      <th className="py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Location</th>
+                      <th className="hidden sm:table-cell py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Earnings</th>
+                      <th className="hidden sm:table-cell py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Location</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
                     {leaderboardData.map((provider, index) => (
                       <tr key={index} className={walletAddress && provider.address === `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` ? 'bg-accent/10' : ''}>
-                        <td className="py-4">
+                        <td className="py-4 pl-4 sm:pl-3">
                           <div className="flex items-center">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-500' : index === 1 ? 'bg-gray-400/20 text-gray-400' : index === 2 ? 'bg-amber-600/20 text-amber-600' : 'bg-card text-gray-400'}`}>
+                            <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold ${index === 0 ? 'bg-yellow-500/20 text-yellow-500' : index === 1 ? 'bg-gray-400/20 text-gray-400' : index === 2 ? 'bg-amber-600/20 text-amber-600' : 'bg-card text-gray-400'}`}>
                               {provider.rank}
                             </div>
                           </div>
                         </td>
                         <td className="py-4">
-                          <div className="text-sm font-medium text-white">
+                          <div className="text-xs sm:text-sm font-medium text-white">
                             {walletAddress && provider.address === `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` ? (
-                              <span className="text-accent">{provider.address} (You)</span>
+                              <span className="text-accent">{provider.address} <span className="text-xs">(You)</span></span>
                             ) : (
                               provider.address
                             )}
                           </div>
                         </td>
                         <td className="py-4">
-                          <div className="text-sm text-white">{provider.gpus}</div>
+                          <div className="text-xs sm:text-sm text-white">{provider.gpus}</div>
                         </td>
-                        <td className="py-4">
+                        <td className="hidden sm:table-cell py-4">
                           <div className="text-sm text-white">{provider.earnings.toLocaleString()} $NAI</div>
                         </td>
-                        <td className="py-4">
+                        <td className="hidden sm:table-cell py-4">
                           <div className="text-sm text-white">{provider.location}</div>
                         </td>
                       </tr>
@@ -480,42 +480,42 @@ export default function LendGpu() {
                 <h4 className="text-lg font-semibold mb-4">Lender Requirements</h4>
                 <div className="space-y-4">
                   <div className="flex items-start">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                    <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
                       1
                     </div>
                     <div className="ml-3">
-                      <h5 className="text-base font-medium text-white">Dedicated GPU</h5>
-                      <p className="text-sm text-gray-400">Must have a dedicated GPU with at least 6GB VRAM that's not your primary display adapter</p>
+                      <h5 className="text-sm sm:text-base font-medium text-white">Dedicated GPU</h5>
+                      <p className="text-xs sm:text-sm text-gray-400">Must have a dedicated GPU with at least 6GB VRAM that&apos;s not your primary display adapter</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                    <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
                       2
                     </div>
                     <div className="ml-3">
-                      <h5 className="text-base font-medium text-white">Internet Connection</h5>
-                      <p className="text-sm text-gray-400">Stable internet connection with at least 10 Mbps upload speed</p>
+                      <h5 className="text-sm sm:text-base font-medium text-white">Internet Connection</h5>
+                      <p className="text-xs sm:text-sm text-gray-400">Stable internet connection with at least 10 Mbps upload speed</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                    <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
                       3
                     </div>
                     <div className="ml-3">
-                      <h5 className="text-base font-medium text-white">Power Supply</h5>
-                      <p className="text-sm text-gray-400">Stable power supply with UPS recommended for optimal earnings</p>
+                      <h5 className="text-sm sm:text-base font-medium text-white">Power Supply</h5>
+                      <p className="text-xs sm:text-sm text-gray-400">Stable power supply with UPS recommended for optimal earnings</p>
                     </div>
                   </div>
                   
                   <div className="flex items-start">
-                    <div className="flex-shrink-0 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                    <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-accent/20 flex items-center justify-center text-accent">
                       4
                     </div>
                     <div className="ml-3">
-                      <h5 className="text-base font-medium text-white">Cooling Solution</h5>
-                      <p className="text-sm text-gray-400">Adequate cooling to maintain optimal GPU temperatures during extended usage</p>
+                      <h5 className="text-sm sm:text-base font-medium text-white">Cooling Solution</h5>
+                      <p className="text-xs sm:text-sm text-gray-400">Adequate cooling to maintain optimal GPU temperatures during extended usage</p>
                     </div>
                   </div>
                 </div>
