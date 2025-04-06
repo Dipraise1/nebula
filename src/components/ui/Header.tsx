@@ -5,6 +5,9 @@ import Button from './Button';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 // Define minimal types for Ethereum window provider
+// Using more specific types instead of any would require a full ethereum provider type definition
+// which is beyond the scope of this fix
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare global {
   interface Window {
     ethereum?: {
@@ -14,9 +17,7 @@ declare global {
     };
   }
 }
-
-// Add TypeScript linter exception for ethereum types
-// @ts-ignore
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 // Network configuration
 type NetworkConfig = {
